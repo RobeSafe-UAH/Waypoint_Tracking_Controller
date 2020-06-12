@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- Start nodes -->
+  <node pkg="waypoint_tracking_controller" type="controller_node" name="controller" output="screen" >
+    <param name="N_max"   		value="500" />         	<!--Max. spline sectiones   max value=500 -->
+    <param name="min_dist"   		value="4" />           	<!--Min. distance between waypoints    -->
+    <param name="rc_max"		value="140.0" />       	<!--Max. curvature radius    -->
+    <param name="rc_min"		value="1.0" />         	<!--Min. curvature radius    -->
+    <param name="v_max"			value="13.5" />        	<!--Max. speed in m/s    -->
+    <param name="N_RET_VEL"		value="4" />           	<!--Number of delays: Np + Nc-->
+    <param name="sample_time"		value="0.1" />          	<!--Sample time    -->
+    <param name="q11"		        value="5" />      	<!--Q(1,1) LQR control    -->
+    <param name="q22"		        value="0.0001" />      	<!--Q(2,2) LQR control   -->
+    <param name="r11"		        value="1000" />     	<!--R LQR control    -->
+  </node>
+
+</launch>
+
+
