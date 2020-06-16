@@ -9,7 +9,7 @@
     <param name="rc_max"		value="140.0" />       	<!--Max. curvature radius    -->
     <param name="rc_min"		value="1.0" />         	<!--Min. curvature radius    -->
     <param name="v_max"			value="13.5" />        	<!--Max. speed in m/s    -->
-    <param name="N_RET_VEL"		value="4" />           	<!--Number of delays: Np + Nc-->
+    <param name="n_ret_vel"		value="4" />           	<!--Number of delays: Np + Nc-->
     <param name="sample_time"		value="0.1" />          	<!--Sample time    -->
     <param name="q11"		        value="5" />      	<!--Q(1,1) LQR control    -->
     <param name="q22"		        value="0.0001" />      	<!--Q(2,2) LQR control   -->

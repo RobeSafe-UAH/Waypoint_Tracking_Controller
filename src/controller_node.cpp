@@ -427,21 +427,28 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Timer timer;
 
-	n.getParam("N_max",N_max);
-	n.getParam("min_dist",min_dist);
-	n.getParam("rc_max",rc_max);
-	n.getParam("rc_min",rc_min);
-        n.getParam("v_max",v_max);
-        n.getParam("n_ret_vel",n_ret_vel);
-        n.getParam("sample_time",sample_time);
-	n.getParam("q11",q11);
-	n.getParam("q22",q22);
-	n.getParam("r11",r11);
+	n.param<int>("/controller/N_max",N_max,500);
+	n.param<int>("/controller/min_dist",min_dist,10);
+	n.param<double>("/controller/rc_max",rc_max,20);
+	n.param<double>("/controller/rc_min",rc_min,1);
+        n.param<double>("/controller/v_max",v_max,10);
+        n.param<int>("/controller/n_ret_vel",n_ret_vel,2);
+        n.param<double>("/controller/sample_time",sample_time,0.1);
+	n.param<double>("/controller/q11",q11,1);
+	n.param<double>("/controller/q22",q22,1);
+	n.param<double>("/controller/r11",r11,1);
 
-        A[0]=1.0;  A[1]=v*sample_time; A[2]=0.0;  A[3]=1.0;
-	B[0]=v*(sample_time*sample_time)/2;  B[1]=sample_time;
-	Q[0]=q11; Q[1]=0.0; Q[2]=0.0; Q[3]=q22;
-	R=r11;
+	ROS_INFO("\nPARAMETROS:");
+	ROS_INFO("\tN_max: %d",N_max);
+        ROS_INFO("\tmin_dist: %d",min_dist);
+        ROS_INFO("\trc_max: %lf",rc_max);
+	ROS_INFO("\trc_min: %lf",rc_min);
+ 	ROS_INFO("\tv_max: %lf",v_max);
+ 	ROS_INFO("\tn_ret_vel: %d",n_ret_vel);
+	ROS_INFO("\tsample_time: %lf",sample_time);
+	ROS_INFO("\tq11: %lf",q11);
+	ROS_INFO("\tq22: %lf",q22);
+	ROS_INFO("\tr11: %lf",r11);
 
 	ros::Subscriber spline_sub = n.subscribe("/waypoints_input", 1000, trajectoryCallback); 
 	ros::Subscriber odom_sub = n.subscribe("/absolute_pose", 1000, odometryCallback); 
