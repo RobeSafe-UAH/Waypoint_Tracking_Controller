@@ -449,8 +449,8 @@ int main(int argc, char **argv)
 	Q[0]=q11; Q[1]=0.0; Q[2]=0.0; Q[3]=q22;
 	R=r11;
 
-	ros::Subscriber spline_sub = n.subscribe("/t4ac/control/spline", 1000, trajectoryCallback); 
-	ros::Subscriber odom_sub = n.subscribe("/t4ac/localization/pose", 1000, odometryCallback); 
+	ros::Subscriber spline_sub = n.subscribe("/waypoints_input", 1000, trajectoryCallback); 
+	ros::Subscriber odom_sub = n.subscribe("/absolute_pose", 1000, odometryCallback); 
 	ros::Subscriber external_speed_sub = n.subscribe("/external_speed", 1000, externalSpeedCallback); 
 
 	spline_pub = n.advertise<nav_msgs::Path> ("/spline",1, true);
