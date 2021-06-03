@@ -26,9 +26,6 @@ int n_ret_vel;
 double sample_time;
 double q11,q22,r11; 
 
-//QUEDA IMPLEMTAR LAMDA Y SPEED MODE
-
-
 std::vector <double> arrayRc;
 std::vector <double> arrayVel;
 double x_fin, y_fin;
@@ -36,14 +33,13 @@ double coefs[n_max][8];
 double x_fin_prev=0, y_fin_prev=0, u=0.5, u_ant = 0.5, pose_d[3];
 double actualPose[3];
 double external_speed;
-//(RODRIGO)
 double v=0, ro=0, rc = 0;
 double dist_location=1.2, dist_wheels=1.462;    
 double max_steer_angle= 1.0472;  
 double A[4],B[2],Q[4],R,Kr[2];
 //Delay compensation variables
 double buffer_vel[2][N_RET_VEL_MAX];
-double evol_vel[2][N_RET_VEL_MAX]; //fila 1 v, fila 2 ro //RODRIGO
+double evol_vel[2][N_RET_VEL_MAX]; //fila 1 v, fila 2 ro 
 
 int n_tramo = 0, cambia_tramo=0, n_tramos = 0;
 int init=0, init_odom=0;
@@ -85,7 +81,7 @@ void suma_ident(double *mat, int n);
 void Inversa2(double *origen, double *destino);
 void Traspuesta2(double *origen, double *destino);
 void Sumar(double *origen1, double *origen2, int nf, int nc, double *destino);
-void Consigna_ro(double de, double oe, double Kr[2], double *ro);//RODRIGO
+void Consigna_ro(double de, double oe, double Kr[2], double *ro);
 void velGeneration ();
 
 //**************************Spline publisher************************************************//
@@ -253,7 +249,7 @@ void velGeneration ()
 void odometryCallback(const boost::shared_ptr<nav_msgs::Odometry const>& msg)
 {
 
-	//RODRIGO
+	
 	double x_location, y_location, theta_location;
 
 	actualOdom = *msg;
@@ -368,21 +364,19 @@ void timerCallback(const ros::TimerEvent& e)
 	}
 	if(v>v_max)
 		v=v_max;
-	std::cout<<"V   "<<v<<"    U   "<<u<<"    Ntramo   "<<n_tramo<<"/"<<n_tramos<<std::endl;
-
-
-	//RODRIGO
+		
+	
 
 	A[1]= v*sample_time;
 	B[0]= v*(sample_time)+(v*v*sample_time*sample_time)/(2*dist_wheels);
 	B[1]= v*(sample_time)/2;
 	Dlqr(Kr,A,B,Q,R);
-	Consigna_ro(de,oe,Kr,&ro);//RODRIGO
+	Consigna_ro(de,oe,Kr,&ro);
 
 	if(stop==false){
 		cmd_vel_msg.linear.x = v;
 		speed_msg.data = v;
-		cmd_vel_msg.angular.x = ro;//RODRIGO
+		cmd_vel_msg.angular.x = ro;
 		steer_msg.data = ro/max_steer_angle;
 		if (ro>max_steer_angle)
 			{
@@ -415,7 +409,7 @@ void timerCallback(const ros::TimerEvent& e)
 		evol_vel[1][i-1]=evol_vel[1][i];
 	}
 	evol_vel[0][n_ret_vel-1] = v;
-	evol_vel[1][n_ret_vel-1] = ro;//RODRIGO
+	evol_vel[1][n_ret_vel-1] = ro;
 }
 
 //********************************MAIN*****************************************//
@@ -431,17 +425,17 @@ int main(int argc, char **argv)
 	n.param<int>("/controller/min_dist",min_dist,10);
 	n.param<double>("/controller/rc_max",rc_max,20);
 	n.param<double>("/controller/rc_min",rc_min,1);
-        n.param<double>("/controller/v_max",v_max,10);
-        n.param<int>("/controller/n_ret_vel",n_ret_vel,2);
-        n.param<double>("/controller/sample_time",sample_time,0.1);
+    n.param<double>("/controller/v_max",v_max,10);
+    n.param<int>("/controller/n_ret_vel",n_ret_vel,2);
+    n.param<double>("/controller/sample_time",sample_time,0.1);
 	n.param<double>("/controller/q11",q11,1);
 	n.param<double>("/controller/q22",q22,1);
 	n.param<double>("/controller/r11",r11,1);
 
 	ROS_INFO("\nPARAMETROS:");
 	ROS_INFO("\tN_max: %d",N_max);
-        ROS_INFO("\tmin_dist: %d",min_dist);
-        ROS_INFO("\trc_max: %lf",rc_max);
+    ROS_INFO("\tmin_dist: %d",min_dist);
+    ROS_INFO("\trc_max: %lf",rc_max);
 	ROS_INFO("\trc_min: %lf",rc_min);
  	ROS_INFO("\tv_max: %lf",v_max);
  	ROS_INFO("\tn_ret_vel: %d",n_ret_vel);
@@ -450,12 +444,17 @@ int main(int argc, char **argv)
 	ROS_INFO("\tq22: %lf",q22);
 	ROS_INFO("\tr11: %lf",r11);
 
-	ros::Subscriber spline_sub = n.subscribe("/waypoints_input", 1000, trajectoryCallback); 
-	ros::Subscriber odom_sub = n.subscribe("/absolute_pose", 1000, odometryCallback); 
+	A[0]=1.0; A[1]=v * sample_time; A[2]=0.0; A[3]=1.0;
+	B[0]=v * (sample_time * sample_time)/2; B[1]=sample_time;
+	Q[0]=q11; Q[1]=0.0; Q[2]=0.0; Q[3]=q22;
+	R=r11;
+
+	ros::Subscriber spline_sub = n.subscribe("/t4ac/control/spline", 1000, trajectoryCallback); 
+	ros::Subscriber odom_sub = n.subscribe("/t4ac/localization/pose", 1000, odometryCallback); 
 	ros::Subscriber external_speed_sub = n.subscribe("/external_speed", 1000, externalSpeedCallback); 
 
 	spline_pub = n.advertise<nav_msgs::Path> ("/spline",1, true);
-	spline_points_pub = n.advertise<visualization_msgs::Marker> ("points_spline",1,true);
+	spline_points_pub = n.advertise<visualization_msgs::Marker> ("/points_spline",1,true);
 	reference_pose_pub = n.advertise<geometry_msgs::PoseStamped> ("/reference_pose",1,true);
 	predicted_pose_pub = n.advertise<geometry_msgs::PoseStamped> ("/predicted_pose",1,true);
 	cmd_vel_pub = n.advertise<geometry_msgs::Twist> ("/cmd_vel",1,true);
@@ -806,7 +805,7 @@ void Sumar(double *origen1, double *origen2, int nf, int nc, double *destino)
 
 //**********************APLICA LA LEY DE CONTROL OPTIMO PARA HAYAR ro=-K*x)**********************//
 
-void Consigna_ro(double de, double oe, double Kr[2], double *ro)		//RODRIGO
+void Consigna_ro(double de, double oe, double Kr[2], double *ro)		
 {
 	double estados[2];
 	estados[0]=de;
